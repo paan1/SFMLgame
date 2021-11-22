@@ -1,28 +1,44 @@
 #include "Item.h"
 
-Item::Item(Texture* texture, Vector2f position, int star)
+Item::Item(sf::Texture* texture, float PosX, float PosY, float scale, int type)
 {
-	this->texture = texture;
-	this->position = position;
-	this->sprite.setTexture(*this->texture);
-	if (position.x > 1920)
-		this->sprite.setPosition(1900, position.y);
-	else
-		this->sprite.setPosition(position);
-	this->sprite.setScale(0.05f, 0.05f);
-	this->star = star;
+	this->itemTexture = texture;
+	this->itemSprite.setTexture(*this->itemTexture);
+	this->itemSprite.setPosition(PosX, PosY);
+	this->itemSprite.setScale(scale, scale);
+	this->type = type;
+	this->timerMax = 200;
+	this->timer = 0;
 }
 
 Item::~Item()
 {
+
 }
 
-void Item::Update()
+const sf::FloatRect Item::getBounds() const
 {
-	this->sprite.move(-3.f, 0.8f);
+	return this->itemSprite.getGlobalBounds();
 }
 
-void Item::Draw(RenderTarget& target)
+const bool Item::deleteItem()
 {
-	target.draw(this->sprite);
+	if (this->itemSprite.getPosition().x < -50)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void Item::updateItem()
+{
+	this->itemSprite.move(0, 1);
+}
+
+void Item::render(sf::RenderTarget* target)
+{
+	target->draw(this->itemSprite);
 }

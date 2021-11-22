@@ -8,17 +8,18 @@ using namespace std;
 class Enemy
 {
 private:
-	sf::Sprite sprite;
 	sf::Texture texture;
 	unsigned pointCount;
-	sf::CircleShape shape;
+	sf::RectangleShape shape;
+	Vector2f  direction;
+	Vector2f  directionNorm;
+	int random;
 	int type;
 	float speed;
 	int hp;
 	int hpMax;
 	int damage;
 	int points;
-
 	void initVariables();
 	void initShape();
 	void initTexture();
@@ -34,7 +35,8 @@ public:
 	const int& getDamage() const;
 
 	//Functions
-	void update();
+	void enemyspeed();
+	void update(Vector2f pos);
 	void render(sf::RenderTarget* target);
 };
 

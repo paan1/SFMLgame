@@ -24,10 +24,15 @@ private:
 	void initTexture();
 	void initSprite();
 
+	bool checkgameover = false;
+
 public:
 	Player();
 	virtual ~Player();
 
+
+
+	inline const bool isOver() { return checkgameover; }
 	//Accessor
 	const sf::Vector2f& getPos() const;
 	const sf::FloatRect getBounds() const;
@@ -39,11 +44,13 @@ public:
 	void setPosition(const float x, const float y);
 	void setHp(const int hp);
 	void loseHp(const int value);
-
+	void setmovementSpeed(float movementSpeed);
+	void setattackCooldownMax(float attackCooldownMax);
 	//Functions
 	void move(const float dirX, const float dirY);
 	const bool canAttack();
-
+	void reset();
+	
 	void updateAttack();
 	void update();
 	void render(sf::RenderTarget& target);

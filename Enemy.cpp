@@ -13,21 +13,31 @@ void Enemy::initVariables()
 
 void Enemy::initShape()
 {
-	//if (!this->texture.loadFromFile("Textures/enemy.png"))
-	//{
-		//std::cout << "ERROR::PLAYER::INITTEXTURE::Could not load texture file." << "\n";
-	//}
-
-	this->shape.setRadius(this->pointCount * 5);
-	this->shape.setPointCount(this->pointCount);
-	this->shape.setFillColor(sf::Color(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1, 255));
+	random = rand() % 3;
+	if (random == 0)
+	{
+		
+		texture.loadFromFile("Textures/enyme1.png");
+	}
+	else if (random  == 1)
+	{
+		texture.loadFromFile("Textures/enyme2.png");
+	}
+	else if (random == 2)
+	{
+		texture.loadFromFile("Textures/enyme3.png");
+	}
+	this->shape.setRotation(180);
+	this->shape.setTexture(&texture);
+	this->shape.setSize({ 100,100 });
+	//this->shape.setFillColor(sf::Color(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1, 255));
 }
 
 Enemy::Enemy(float pos_x, float pos_y)
 {
 	this->initVariables();
 	this->initShape();
-	
+
 	this->shape.setPosition(pos_x, pos_y);
 }
 
@@ -52,10 +62,18 @@ const int& Enemy::getDamage() const
 	return this->damage;
 }
 
-//Functions
-void Enemy::update()
+void Enemy::enemyspeed()
 {
-	this->shape.move(0.f, this->speed);
+	speed += 1;
+}
+
+//Functions
+void Enemy::update(Vector2f pos)
+{
+	direction = pos - shape.getPosition();
+	directionNorm = direction / sqrt((direction.x * direction.x + direction.y * direction.y));
+	this->shape.move(directionNorm.x * speed, directionNorm.y * speed);
+	this->shape.setRotation(atan2(this->directionNorm.y, this->directionNorm.x) * 180 / 3.14159265359 + 90);
 }
 
 void Enemy::render(sf::RenderTarget* target)

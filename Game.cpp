@@ -1,19 +1,14 @@
 #include "Game.h"
 
 //Private functions
-void Game::initWindow()
-{
-	this->window = new sf::RenderWindow(sf::VideoMode(1500, 900), "Swaglords of Space - Game 3", sf::Style::Close | sf::Style::Titlebar  | sf::Style::Fullscreen);
-	this->window->setFramerateLimit(144);
-	this->window->setVerticalSyncEnabled(false);
-}
+
 
 void Game::initTextures()
 {
 	this->textures["BULLET"] = new sf::Texture();
 	this->textures["BULLET"]->loadFromFile("Textures/bullet.png");
 	//this->textures
-	
+
 }
 
 void Game::initGUI()
@@ -23,14 +18,14 @@ void Game::initGUI()
 		std::cout << "ERROR::GAME::Failed to load font" << "\n";
 
 	//Init point text
-	this->pointText.setPosition(700.f, 25.f);
+	this->pointText.setPosition(1000.f, 25.f);
 	this->pointText.setFont(this->font);
 	this->pointText.setCharacterSize(20);
 	this->pointText.setFillColor(sf::Color::White);
-	this->pointText.setString("test");
+	this->pointText.setString("score:");
 
 	this->gameOverText.setFont(this->font);
-	this->gameOverText.setCharacterSize(60);
+	this->gameOverText.setCharacterSize(100);
 	this->gameOverText.setFillColor(sf::Color::Red);
 	this->gameOverText.setString("Game Over!");
 	this->gameOverText.setPosition(
@@ -44,15 +39,31 @@ void Game::initGUI()
 
 	this->playerHpBarBack = this->playerHpBar;
 	this->playerHpBarBack.setFillColor(sf::Color(25, 25, 25, 200));
+
+
+
+	hpbar.loadFromFile("Textures/Haert.png");
+	hpbarpixel.setSize({ 50,50 });
+	hpbarpixel.setPosition(0, 15);
+	hpbarpixel.setTexture(&hpbar);
+
+	scorebar.loadFromFile("Textures/scorebar.png");
+	scorbarpixel.setSize({ 300,100});
+	scorbarpixel.setPosition(925, 10);
+	scorbarpixel.setTexture(&scorebar);
+
+
+
 }
 
 void Game::initWorld()
 {
-	if (!this->worldBackgroundTex.loadFromFile("Textures/background.png"))
+	if (!this->worldBackgroundTex.loadFromFile("Textures/background3.png"))
 	{
 		std::cout << "ERROR::GAME::COULD NOT LOAD BACKGROUND TEXTURE" << "\n";
 	}
-	this->worldBackground.setScale(1.8f, 1.8f);
+	//this->worldBackground.setPosition(850.f, 750.f);
+	this->worldBackground.setScale(3.5f, 3.5f);
 	this->worldBackground.setTexture(this->worldBackgroundTex);
 }
 
@@ -72,10 +83,26 @@ void Game::initEnemies()
 	this->spawnTimer = this->spawnTimerMax;
 }
 
-//Con/Des
-Game::Game()
+void Game::initItem()
 {
-	this->initWindow();
+	this->itemTexture[0].loadFromFile("Textures/item1.png");
+	this->itemTexture[1].loadFromFile("Textures/item2.png");
+	this->itemTexture[2].loadFromFile("Textures/item3.png");
+
+	//this->itemSpawnTimerMax = 1.f;
+	this->setScale[0] = 1.f;
+	this->setScale[1] = 1.f;
+	this->setScale[2] = 1.f;
+
+
+}
+
+//Con/Des
+Game::Game(RenderWindow* window,Menu* menu, ScoreList* score_list)
+{	
+	this->score_list = score_list;
+	this->menu = menu;
+	this->window = window;
 	this->initTextures();
 	this->initGUI();
 	this->initWorld();
@@ -83,30 +110,13 @@ Game::Game()
 
 	this->initPlayer();
 	this->initEnemies();
+	this->initItem();
+	
 }
 
 Game::~Game()
 {
-	delete this->window;
-	delete this->player;
-
-	//Delete textures
-	for (auto& i : this->textures)
-	{
-		delete i.second;
-	}
-
-	//Delete bullets
-	for (auto* i : this->bullets)
-	{
-		delete i;
-	}
-
-	//Delete enemies
-	for (auto* i : this->enemies)
-	{
-		delete i;
-	}
+	
 }
 
 //Functions
@@ -114,10 +124,15 @@ void Game::run()
 {
 	while (this->window->isOpen())
 	{
+		//deltatime = clock.restart().asSeconds();
+
 		this->updatePollEvents();
 
 		if (this->player->getHp() > 0)
 			this->update();
+		deltaTime = time.restart().asSeconds();
+		itemtimer += deltaTime;
+		checktimer += deltaTime;
 
 		this->render();
 	}
@@ -128,10 +143,25 @@ void Game::updatePollEvents()
 	sf::Event e;
 	while (this->window->pollEvent(e))
 	{
+		
 		if (e.Event::type == sf::Event::Closed)
 			this->window->close();
 		if (e.Event::KeyPressed && e.Event::key.code == sf::Keyboard::Escape)
 			this->window->close();
+
+
+
+		//if (this->maintime.getElapsedTime().asSeconds() >= 10)
+		//{
+
+			//for (auto* enemy : this->enemies)
+			//{
+			//	enemy->enemyspeed();
+			//}
+		//	maintime.restart();
+		//}
+
+
 	}
 }
 
@@ -166,7 +196,7 @@ void Game::updateGUI()
 {
 	std::stringstream ss;
 
-	ss << "Points: " << this->points;
+	ss << "Score: " << this->points;
 
 	this->pointText.setString(ss.str());
 	this->pointText.setScale(3.f, 3.f);
@@ -174,10 +204,16 @@ void Game::updateGUI()
 	//Update player GUI
 	float hpPercent = static_cast<float>(this->player->getHp()) / this->player->getHpMax();
 	this->playerHpBar.setSize(sf::Vector2f(300.f * hpPercent, this->playerHpBar.getSize().y));
+
+
+	//Gui
+	
+	
 }
 
 void Game::updateWorld()
 {
+
 
 }
 
@@ -217,7 +253,7 @@ void Game::updateBullets()
 		if (bullet->getBounds().top + bullet->getBounds().height < 0.f)
 		{
 			//Delete bullet
-			delete this->bullets.at(counter);
+			//delete this->bullets.at(counter);
 			this->bullets.erase(this->bullets.begin() + counter);
 		}
 
@@ -239,7 +275,7 @@ void Game::updateEnemies()
 	unsigned counter = 0;
 	for (auto* enemy : this->enemies)
 	{
-		enemy->update();
+		enemy->update({ player->getPos().x + player->getBounds().width / 2 + 50, player->getPos().y + player->getBounds().height / 2 });
 
 		//Bullet culling (top of screen)
 		if (enemy->getBounds().top > this->window->getSize().y)
@@ -255,8 +291,92 @@ void Game::updateEnemies()
 			delete this->enemies.at(counter);
 			this->enemies.erase(this->enemies.begin() + counter);
 		}
-
+		if (this->points > 100 && this->points <= 1000)
+		{
+			this->spawnTimerMax = 40.f;
+		}
+		else if (this->points > 1000 && this->points <= 1500)
+		{
+			this->spawnTimerMax = 35.f;
+		}
+		else if (this->points > 1500 && this->points <= 2000)
+		{
+			this->spawnTimerMax = 30.f;
+		}
+		else if (this->points > 2000)
+		{
+			this->spawnTimerMax = 20.f;
+		}
 		++counter;
+	}
+}
+
+void Game::updateItem()
+{
+	this->itemSpawnTimer += this->deltaTime;
+	if (itemtimer >= itemspawntime)
+	{
+		itemtimer = 0;
+		this->randomItem = rand() % 3;
+		this->items.push_back(new Item(&this->itemTexture[randomItem], rand() % this->window->getSize().x,
+			(50.f), this->setScale[randomItem], this->randomItem));
+	}
+	if (this->timecooldownspeedmove.getElapsedTime().asSeconds() >= 2)
+	{
+		this->player->setmovementSpeed(2.f);
+	}
+	if (this->timecooldownspeedbulled.getElapsedTime().asSeconds() >= 2)
+	{
+		this->player->setattackCooldownMax(10.f);
+	}
+	for (int i = 0; i < items.size(); i++)
+	{
+		this->items[i]->updateItem();
+		if (this->items[i]->getBounds().intersects(this->player->getBounds()))
+		{
+
+			if (this->items[i]->itemType() == 0)
+			{
+				this->player->setHp(100);
+				delete this->items[i];
+				this->items.erase(this->items.begin() + i);
+			}
+			else if (this->items[i]->itemType() == 1)
+			{
+				this->timecooldownspeedmove.restart();
+				this->player->setmovementSpeed(3.f);
+				delete this->items[i];
+				this->items.erase(this->items.begin() + i);
+
+
+			}
+			else if (this->items[i]->itemType() == 2)
+			{
+				this->timecooldownspeedbulled.restart();
+				this->player->setattackCooldownMax(4.0f);
+				delete this->items[i];
+				this->items.erase(this->items.begin() + i);
+			}
+
+		}
+		
+		/*else if (this->items[i]->deleteItem())
+		{
+			delete this->items[i];
+			this->items.erase(this->items.begin() + i);
+		}*/
+		
+		
+		
+	}
+	
+	if (checktimer >= 6)
+	{
+		checktimer = 0;
+		if (itemspawntime > 5)
+		{
+			itemspawntime -= 1;
+		}
 	}
 }
 
@@ -271,10 +391,10 @@ void Game::updateCombat()
 			{
 				this->points += this->enemies[i]->getPoints();
 
-				delete this->enemies[i];
+				//delete this->enemies[i];
 				this->enemies.erase(this->enemies.begin() + i);
 
-				delete this->bullets[k];
+				//delete this->bullets[k];
 				this->bullets.erase(this->bullets.begin() + k);
 
 				enemy_deleted = true;
@@ -300,13 +420,26 @@ void Game::update()
 	this->updateGUI();
 
 	this->updateWorld();
+
+	this->updateItem();
+}
+
+void Game::gameReset()
+{
+	player->reset();
+	this->points = 0;
+	enemies.clear();
+
 }
 
 void Game::renderGUI()
 {
+	this->window->draw(this->scorbarpixel);
 	this->window->draw(this->pointText);
+	
 	this->window->draw(this->playerHpBarBack);
 	this->window->draw(this->playerHpBar);
+	this->window->draw(this->hpbarpixel);
 }
 
 void Game::renderWorld()
@@ -334,16 +467,24 @@ void Game::render()
 		enemy->render(this->window);
 	}
 
-	for (auto* item : this->enemies)
+	for (auto* item : this->items)
 	{
 		item->render(this->window);
 	}
+
 
 	this->renderGUI();
 
 	//Game over screen
 	if (this->player->getHp() <= 0)
+	{
+		this->menu->start = false;
+		this->menu->states = MENU;
 		this->window->draw(this->gameOverText);
-
+		this->score_list->addEntry(this->menu->enteredName,this->points);
+		overgame = true;
+	}
 	this->window->display();
 }
+
+

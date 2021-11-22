@@ -28,6 +28,7 @@ void Player::initSprite()
 	//Resize the sprite
 	this->sprite.scale(0.9f, 0.9f);
 	this->sprite.setPosition(850.f, 750.f);
+	//this->sprite.setOrigin(sprite.getLocalBounds().width / 2+50, sprite.getLocalBounds().height / 2);
 }
 
 Player::Player()
@@ -80,8 +81,21 @@ void Player::setHp(const int hp)
 void Player::loseHp(const int value)
 {
 	this->hp -= value;
-	if (this->hp < 0)
+	if (this->hp <= 0)
+	{
 		this->hp = 0;
+		checkgameover = true;
+	}
+}
+
+void Player::setmovementSpeed(float movementSpeed)
+{
+	this->movementSpeed = movementSpeed;
+}
+
+void Player::setattackCooldownMax(float attackCooldownMax)
+{
+	this->attackCooldownMax = attackCooldownMax;
 }
 
 void Player::move(const float dirX, const float dirY)
@@ -100,6 +114,16 @@ const bool Player::canAttack()
 	return false;
 }
 
+void Player::reset()
+{
+	this->sprite.setPosition(850.f, 750.f);
+	this->attackCooldown = this->attackCooldownMax;
+	this->hp = this->hpMax;
+	
+}
+
+
+
 void Player::updateAttack()
 {
 	if (this->attackCooldown < this->attackCooldownMax)
@@ -110,6 +134,7 @@ void Player::updateAttack()
 void Player::update()
 {
 	this->updateAttack();
+
 }
 
 void Player::render(sf::RenderTarget& target)

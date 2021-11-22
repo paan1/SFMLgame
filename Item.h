@@ -1,18 +1,36 @@
-#pragma once
-#include "Bullet.h"
+#ifndef ITEM_H
+#define ITEM_H
+
+#include <vector>
+#include <iostream>
+#include <ctime>
+#include <cstdlib>
+
+#include "SFML/Audio.hpp"
+#include "SFML/Graphics.hpp"
+#include "SFML/System.hpp"
+#include "SFML/Network.hpp"
+#include "SFML/Window.hpp"
+
 class Item
 {
 private:
-	Texture* texture;
-	Sprite sprite;
-	Vector2f position;
-	int star;
+	sf::Texture* itemTexture;
+	sf::Sprite itemSprite;
+	float timer;
+	float timerMax;
+	int type;
+
 public:
-	Item(Texture* texture, Vector2f position, int star);
+	Item(sf::Texture* texture, float PosX, float PosY, float scale, int type);
 	virtual ~Item();
-	inline FloatRect getGlobalBounds() const { return this->sprite.getGlobalBounds(); }
-	inline int getStar() { return this->star; };
-	inline Vector2f getPosition() const { return this->sprite.getPosition(); }
-	void Update();
-	void Draw(RenderTarget& target);
+
+	inline int itemType() { return this->type; }
+	const sf::FloatRect getBounds() const;
+	const bool deleteItem();
+
+	void updateItem();
+	void render(sf::RenderTarget* target);
 };
+
+#endif // !ITEM_H
