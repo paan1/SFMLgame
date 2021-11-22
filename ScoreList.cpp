@@ -4,7 +4,7 @@ ScoreList::ScoreList(std::string file_name) {
 
     this->file_name = file_name;
 }
-
+//นะจ่ะ
 /**
  * สำหรับโหลดข้อมูลจากไฟล์เก็บไว้ในรายการ
  *
